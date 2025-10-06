@@ -608,39 +608,37 @@ public function destroy(Request $request, $id)
         }
     }
 
-    // 🔥 APPLY CUSTOM LABELS dari database
-    if (Auth::check()) {
-        $customUser = CustomUser::where('username', Auth::user()->username)->first();
-        if ($customUser) {
-            $customConfigs = SensorColumnConfig::where('user_id', $customUser->id)
-                ->where('is_visible', true)
-                ->get()
-                ->keyBy('column_name');
+  // 🔥 APPLY CUSTOM LABELS dan VISIBILITY dari database
+if (Auth::check()) {
+    $customUser = CustomUser::where('username', Auth::user()->username)->first();
+    if ($customUser) {
+        // ✅ PERBAIKAN: Ambil SEMUA config (tanpa filter is_visible)
+        $customConfigs = SensorColumnConfig::where('user_id', $customUser->id)
+            ->get()
+            ->keyBy('column_name');
 
-            foreach ($availableColumns as $columnName => $label) {
-                if (isset($customConfigs[$columnName])) {
-                    $availableColumns[$columnName] = $customConfigs[$columnName]->custom_label;
+        // Filter visibility dan apply custom label
+        $visibleColumns = [];
+        foreach ($availableColumns as $columnName => $label) {
+            if (isset($customConfigs[$columnName])) {
+                // Ada config: cek visibility-nya
+                if ($customConfigs[$columnName]->is_visible) {
+                    // Tampilkan dengan custom label
+                    $visibleColumns[$columnName] = $customConfigs[$columnName]->custom_label;
                 }
+                // Jika is_visible = false, SKIP (tidak ditambahkan ke array)
+            } else {
+                // Tidak ada config: default tampilkan dengan label original
+                $visibleColumns[$columnName] = $label;
             }
-
-            // Filter only visible columns
-            $visibleColumns = [];
-            foreach ($availableColumns as $columnName => $label) {
-                if (isset($customConfigs[$columnName])) {
-                    if ($customConfigs[$columnName]->is_visible) {
-                        $visibleColumns[$columnName] = $label;
-                    }
-                } else {
-                    // Default: tampilkan jika tidak ada config
-                    $visibleColumns[$columnName] = $label;
-                }
-            }
-
-            $availableColumns = $visibleColumns;
         }
-    }
 
-    return $availableColumns;
+        $availableColumns = $visibleColumns;
+    }
+}
+
+return $availableColumns;
+
 }
 
 /**
