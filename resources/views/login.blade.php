@@ -20,7 +20,7 @@
     <div class="login-container">
         <div class="logo-container">
             <div class="logo">
-                <img src="{{ asset('images/Logo_LAI.PNG') }}" alt="Lautan Air Indonesia Logo" class="logo">
+                <img src="{{ asset('images/Logo_LAI.png') }}" alt="Lautan Air Indonesia Logo" class="logo">
             </div>
         </div>
 

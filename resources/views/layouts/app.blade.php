@@ -36,6 +36,19 @@
 
         * { box-sizing: border-box; }
 
+/* Fix: kecualikan elemen icon SweetAlert2 dari reset box-sizing di atas */
+.swal2-icon,
+.swal2-icon *,
+.swal2-success-ring,
+.swal2-success-fix,
+.swal2-success-line-tip,
+.swal2-success-line-long,
+.swal2-x-mark,
+.swal2-x-mark-line-left,
+.swal2-x-mark-line-right {
+    box-sizing: content-box !important;
+}
+
         body { 
             font-family: 'Poppins', sans-serif; 
             background: url('{{ asset('images/bgLogin1.png') }}') no-repeat center center fixed;
@@ -257,10 +270,6 @@
     
     .swal2-success .swal2-success-ring {
         border-color: var(--success-green) !important;
-    }
-    
-    .swal2-success .swal2-success-fix {
-        background-color: var(--success-green) !important;
     }
     
     .swal2-error .swal2-x-mark {
