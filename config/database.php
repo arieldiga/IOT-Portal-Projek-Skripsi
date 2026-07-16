@@ -53,17 +53,17 @@ return [
         // sehingga tidak perlu koneksi ke server eksternal
         // -------------------------------------------------------
         'pgsql_sensor' => [
-            'driver'      => 'pgsql',
-            'host'        => env('SENSOR_DB_HOST', '127.0.0.1'),
-            'port'        => env('SENSOR_DB_PORT', '5432'),
-            'database'    => env('SENSOR_DB_DATABASE', 'projek2_LAI'),
-            'username'    => env('SENSOR_DB_USERNAME', 'postgres'),
-            'password'    => env('SENSOR_DB_PASSWORD', ''),
-            'charset'     => 'utf8',
-            'prefix'      => '',
-            'search_path' => 'public',
-            'sslmode'     => 'prefer',
-        ],
+    'driver'      => 'pgsql',
+    'host'        => env('SENSOR_DB_HOST', env('DB_HOST', '127.0.0.1')),
+    'port'        => env('SENSOR_DB_PORT', env('DB_PORT', '5432')),
+    'database'    => env('SENSOR_DB_DATABASE', env('DB_DATABASE', 'projek2_LAI')),
+    'username'    => env('SENSOR_DB_USERNAME', env('DB_USERNAME', 'postgres')),
+    'password'    => env('SENSOR_DB_PASSWORD', env('DB_PASSWORD', '')),
+    'charset'     => 'utf8',
+    'prefix'      => '',
+    'search_path' => 'public',
+    'sslmode'     => 'prefer',
+],
 
     ],
 
