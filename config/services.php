@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'vendor_api' => [
+        'base_url' => env('VENDOR_API_BASE_URL', 'http://127.0.0.1:8001'),
+        'api_key'  => env('VENDOR_API_KEY'),
+    ],
+
 ];

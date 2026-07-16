@@ -31,7 +31,7 @@
                 <tr>
                     <th>Username (Display)</th>
                     <th>Customer (API)</th>
-                    <th>ID - API</th>
+                    <th>ID</th>
                     <th>Role</th>
                     <th>Dibuat Pada</th>
                     <th class="text-center" width="150">Actions</th>

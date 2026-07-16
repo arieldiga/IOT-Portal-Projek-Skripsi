@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class SensorUser extends Model
 {
-    protected $connection = 'pgsql_sensor'; // pakai koneksi DB sensor
-    protected $table = 'users';             // tabel di lsa_sensor
+    protected $connection = 'pgsql_sensor';
+    protected $table      = 'sensor_users';   // ← diganti dari 'users' agar tidak bentrok
     protected $primaryKey = 'id';
-    public $timestamps = false;
+    public $timestamps    = true;
 
     protected $fillable = [
         'id',

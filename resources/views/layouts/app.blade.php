@@ -204,7 +204,6 @@
             .welcome-card { padding: 24px; }
         }
 
-        <style>
     /* ... CSS yang sudah ada ... */
     
     /* Custom SweetAlert Styles */
@@ -294,23 +293,32 @@
 </head>
 <body>
     <!-- Enhanced Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+<nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
         <a class="navbar-brand" href="#">
             <img src="https://www.lautanairindonesia.com/wp-content/uploads/2025/05/Logo-LAI-Horizontal_2025-1024x415.png" alt="LAI Logo" class="logo-navbar">
             <span class="fw-bold text-primary">Smart Dashboard</span>
         </a>
-        <div class="ms-auto d-flex align-items-center">
-            <span class="me-3 text-muted">
-                <i class="fas fa-user-circle me-2"></i> 
-                {{ Auth::user()->display_name ?? Auth::user()->username }}
-            </span>
-            <form id="logoutForm" action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="button" class="btn-logout" onclick="handleLogout(this)">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
+
+        <!-- Tombol hamburger, muncul di layar < 992px -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Konten yang di-collapse di mobile -->
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <div class="ms-auto d-flex flex-column flex-lg-row align-items-center gap-2 mt-3 mt-lg-0">
+                <span class="me-lg-3 text-muted">
+                    <i class="fas fa-user-circle me-2"></i>
+                    {{ Auth::user()->display_name ?? Auth::user()->username }}
+                </span>
+                <form id="logoutForm" action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="button" class="btn-logout" onclick="handleLogout(this)">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </nav>

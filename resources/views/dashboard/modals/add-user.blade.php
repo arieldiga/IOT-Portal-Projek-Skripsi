@@ -32,10 +32,10 @@
                 {{-- Field ID - API --}}
                 <div class="mb-3">
                     <label for="apiIdSelect" class="form-label">
-                        <i class="fas fa-key me-1"></i>ID - API
+                        <i class="fas fa-key me-1"></i>ID
                     </label>
                     <select name="name" id="apiIdSelect" class="form-select" required>
-                        <option value="">Pilih ID - API</option>
+                        <option value="">Pilih ID</option>
                     </select>
                 </div>
 
@@ -66,7 +66,7 @@
                     </label>
                     <select name="role" id="roleSelect" class="form-select" required>
                         <option value="superadmin" {{ old('role') == 'superadmin' ? 'selected' : '' }}>Super Admin</option>
-                        <option value="read_export" {{ old('role') == 'read_export' ? 'selected' : '' }}>Read & Export</option>
+                        <option value="read_export" {{ old('role') == 'read_export' ? 'selected' : '' }}>Read & Export(Vendor)</option>
                     </select>
                 </div>
             </div>
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch('{{ route("api.users") }}')
                 .then(response => response.json())
                 .then(data => {
-                    apiIdSelect.innerHTML = '<option value="">Pilih ID - API</option>';
+                    apiIdSelect.innerHTML = '<option value="">Pilih ID</option>';
                     data.forEach(user => {
                         apiIdSelect.innerHTML += `<option value="${user.id}" data-username="${user.username}">${user.id} - ${user.username}</option>`;
                     });
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset form saat modal ditutup
         addUserModal.addEventListener('hidden.bs.modal', function() {
             document.querySelector('#addUserModal form').reset();
-            apiIdSelect.innerHTML = '<option value="">Pilih ID - API</option>';
+            apiIdSelect.innerHTML = '<option value="">Pilih ID</option>';
         });
     }
 });

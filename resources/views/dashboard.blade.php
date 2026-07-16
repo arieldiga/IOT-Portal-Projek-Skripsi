@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch('{{ route("api.users") }}')
                 .then(response => response.json())
                 .then(data => {
-                    apiIdSelect.innerHTML = '<option value="">Pilih ID - API</option>';
+                    apiIdSelect.innerHTML = '<option value="">Pilih ID</option>';
                     data.forEach(user => {
                         apiIdSelect.innerHTML += `<option value="${user.id}" data-username="${user.username}">${user.id} - ${user.username}</option>`;
                     });
@@ -399,6 +399,20 @@ function setupEventListeners() {
             });
             return;
         }
+
+        // ✅ Validasi maksimal 30 hari
+        const maxRange = 30 * 24 * 60 * 60 * 1000; // 30 hari (ms)
+        const range = new Date(toDate) - new Date(fromDate);
+
+        if (range > maxRange) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Rentang Terlalu Panjang!',
+                text: 'Maksimal rentang tanggal adalah 30 hari',
+                confirmButtonColor: '#dc3545'
+            });
+            return;
+        }
         
         applyFilters();
     });
@@ -416,20 +430,37 @@ function setupEventListeners() {
 }
 
 function applyFilters() {
-    const formData = new FormData(document.getElementById('filterForm'));
+    const form = document.getElementById('filterForm');
+    const formData = new FormData(form);
+    
     currentFilters = {
         parameter: formData.get('parameter'),
         from: formData.get('from'),
         to: formData.get('to')
     };
-    
+
+    // ✅ Validasi rentang maksimal 30 hari
+    const start = new Date(currentFilters.from);
+    const end   = new Date(currentFilters.to);
+    const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 30) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Rentang Terlalu Panjang!',
+            text: 'Maksimal rentang tanggal adalah 30 hari'
+        });
+        return; // 
+    }
+
     showLoading('.chart-container');
-    
+
     const placeholder = document.getElementById('chartPlaceholder');
     if (placeholder) {
         placeholder.style.display = 'none';
     }
-    
+
+    // ✅ Lanjut fetch setelah lolos validasi tanggal
     fetch('/api/sensor-data/filtered', {
         method: 'POST',
         headers: {
@@ -442,12 +473,12 @@ function applyFilters() {
         if (data.success && data.chartData && data.chartData.length > 0) {
             isDataLoaded = true;
             updateChart(data.chartData, data.availableColumns);
-            
+
             const toggleBtn = document.getElementById('toggleTableBtn');
             if (toggleBtn) {
                 toggleBtn.style.display = 'inline-block';
             }
-            
+
             showToast('Data berhasil dimuat!', 'success');
         } else {
             isDataLoaded = false;
