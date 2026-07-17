@@ -88,10 +88,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const apiIdSelect = document.getElementById('apiIdSelect');
     const customerField = document.getElementById('customerField');
     const displayNameField = document.getElementById('displayNameField');
+    let apiUsersLoaded = false;
 
     if (addUserModal) {
-        // Load API users saat modal dibuka
+        // Load API users HANYA sekali (bukan tiap modal dibuka)
         addUserModal.addEventListener('show.bs.modal', function() {
+            if (apiUsersLoaded) return;
+
             fetch('{{ route("api.users") }}')
                 .then(response => response.json())
                 .then(data => {
@@ -99,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     data.forEach(user => {
                         apiIdSelect.innerHTML += `<option value="${user.id}" data-username="${user.username}">${user.id} - ${user.username}</option>`;
                     });
+                    apiUsersLoaded = true;
                 })
                 .catch(error => {
                     console.error('Error loading API users:', error);
@@ -111,17 +115,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedOption = this.options[this.selectedIndex];
             const username = selectedOption.getAttribute('data-username') || '';
             customerField.value = username;
-            
-            // Optional: Auto-suggest display name (user bisa edit)
+
             if (displayNameField.value === '') {
                 displayNameField.value = username;
             }
         });
 
-        // Reset form saat modal ditutup
+        // Reset FORM saja saat modal ditutup, JANGAN reset dropdown API
         addUserModal.addEventListener('hidden.bs.modal', function() {
             document.querySelector('#addUserModal form').reset();
-            apiIdSelect.innerHTML = '<option value="">Pilih ID</option>';
+            // dropdown apiIdSelect TIDAK di-reset, biar nggak fetch ulang tiap buka modal
         });
     }
 });

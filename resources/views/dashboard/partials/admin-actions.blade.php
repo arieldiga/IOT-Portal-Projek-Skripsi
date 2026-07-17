@@ -15,7 +15,7 @@
 
 {{-- Daftar User --}}
 <div class="card shadow-sm">
-    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+    <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-2">
         <div class="d-flex align-items-center">
             <i class="fas fa-users text-primary me-2"></i>
             <h5 class="mb-0">Daftar User Terdaftar</h5>
@@ -25,8 +25,9 @@
             Total: {{ $users->count() }} users
         </div>
     </div>
+
     <div class="card-body table-responsive">
-        <table class="table table-striped table-hover align-middle">
+        <table class="table table-striped table-hover align-middle user-table">
             <thead class="table-primary">
                 <tr>
                     <th>Username (Display)</th>
@@ -40,7 +41,7 @@
             <tbody>
                 @forelse ($users as $user)
                     <tr>
-                        <td>
+                        <td data-label="Username (Display)">
                             <div class="d-flex align-items-center">
                                 <div class="avatar-sm me-2">
                                     <span class="badge bg-{{ $user->role === 'superadmin' ? 'danger' : 'success' }} rounded-circle p-2">
@@ -52,36 +53,36 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Customer (API)">
                             <span class="badge bg-secondary">
                                 <i class="fas fa-building me-1"></i>{{ $user->username }}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="ID">
                             <code class="text-primary">{{ $user->name }}</code>
                         </td>
-                        <td>
+                        <td data-label="Role">
                             <span class="badge {{ $user->role === 'superadmin' ? 'bg-danger' : 'bg-success' }}">
                                 {{ $user->role === 'superadmin' ? 'Super Admin' : 'Read & Export' }}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="Dibuat Pada">
                             <small class="text-muted">
                                 <i class="fas fa-calendar me-1"></i>
                                 {{ $user->created_at->format('d M Y H:i') }}
                             </small>
                         </td>
-                        <td class="text-center">
+                        <td class="text-center" data-label="Actions">
                             @if($user->role === 'read_export')
-                                <button class="btn btn-outline-info btn-sm me-1" 
+                                <button class="btn btn-outline-info btn-sm me-1"
                                         onclick="openCustomizeModal({{ $user->id }}, '{{ addslashes($user->display_name ?? $user->username) }}')"
                                         title="Customize Columns">
                                     <i class="fas fa-cog"></i>
                                 </button>
                             @endif
-                            
+
                             @if($user->id !== Auth::user()->id)
-                                <button class="btn btn-outline-danger btn-sm" 
+                                <button class="btn btn-outline-danger btn-sm"
                                         onclick="openDeleteModal('{{ $user->id }}', '{{ addslashes($user->display_name ?? $user->username) }}', '{{ $user->role }}')"
                                         title="Delete User">
                                     <i class="fas fa-trash-alt"></i>
@@ -115,7 +116,7 @@
                 <small class="text-muted">
                     <i class="fas fa-chart-pie me-1"></i>
                     <strong>Statistics:</strong>
-                    Superadmins: {{ $users->where('role', 'superadmin')->count() }} | 
+                    Superadmins: {{ $users->where('role', 'superadmin')->count() }} |
                     Read & Export: {{ $users->where('role', 'read_export')->count() }}
                 </small>
             </div>
@@ -129,3 +130,71 @@
     </div>
     @endif
 </div>
+
+{{-- Responsive: tabel jadi "card list" di layar kecil, tetap tabel normal di desktop --}}
+<style>
+    @media (max-width: 767.98px) {
+        .user-table thead {
+            display: none; /* header default disembunyikan, tiap sel dapat label sendiri */
+        }
+
+        .user-table, .user-table tbody, .user-table tr, .user-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .user-table {
+            border: none;
+        }
+
+        .user-table tr {
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .user-table tbody tr:nth-of-type(odd) {
+            background-color: transparent !important; /* matikan striping bawaan bootstrap di mode card */
+        }
+
+        .user-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: right;
+            padding: 0.5rem 0.25rem;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .user-table td:last-child {
+            border-bottom: none;
+        }
+
+        .user-table td::before {
+            content: attr(data-label);
+            font-weight: 600;
+            color: #6c757d;
+            text-align: left;
+            padding-right: 0.75rem;
+            white-space: nowrap;
+        }
+
+        /* Sel "no data" (colspan) tidak perlu jadi flex */
+        .user-table td[colspan] {
+            display: block;
+            text-align: center;
+        }
+
+        .user-table td[colspan]::before {
+            content: none;
+        }
+
+        /* Actions rapikan tombolnya biar sejajar di kanan */
+        .user-table td.text-center {
+            justify-content: flex-end;
+        }
+    }
+</style>

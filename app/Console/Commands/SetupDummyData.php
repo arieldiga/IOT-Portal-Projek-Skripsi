@@ -46,10 +46,10 @@ class SetupDummyData extends Command
         $this->info('║   ✅  SELESAI! Proyek siap dijalankan.       ║');
         $this->info('╠══════════════════════════════════════════════╣');
         $this->info('║  Login:                                      ║');
-        $this->info('║  superadmin  / password123  (super_admin)    ║');
-        $this->info('║  Cafe  / password123  (viewer)         ║');
-        $this->info('║  Gerai Galon  / password123  (viewer)         ║');
-        $this->info('║  Kedai Kopi  / password123  (viewer)         ║');
+        $this->info('║  superadmin  / superadmin  (super_admin)    ║');
+        $this->info('║  Cafe  / Cafe  (viewer)         ║');
+        $this->info('║  Gerai Galon  / Gerai Galon  (viewer)         ║');
+        $this->info('║  Kedai Kopi  / Kedai Kopi  (viewer)         ║');
         $this->info('╚══════════════════════════════════════════════╝');
         $this->info('');
 
