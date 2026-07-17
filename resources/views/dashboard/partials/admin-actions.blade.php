@@ -26,7 +26,9 @@
         </div>
     </div>
 
-    <div class="card-body table-responsive">
+    <div class="card-body p-0">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle user-table mb-0">
         <table class="table table-striped table-hover align-middle user-table">
             <thead class="table-primary">
                 <tr>
@@ -133,68 +135,18 @@
 
 {{-- Responsive: tabel jadi "card list" di layar kecil, tetap tabel normal di desktop --}}
 <style>
-    @media (max-width: 767.98px) {
-        .user-table thead {
-            display: none; /* header default disembunyikan, tiap sel dapat label sendiri */
-        }
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
-        .user-table, .user-table tbody, .user-table tr, .user-table td {
-            display: block;
-            width: 100%;
-        }
+.user-table {
+    min-width: 1000px;
+    white-space: nowrap;
+}
 
-        .user-table {
-            border: none;
-        }
-
-        .user-table tr {
-            margin-bottom: 1rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .user-table tbody tr:nth-of-type(odd) {
-            background-color: transparent !important; /* matikan striping bawaan bootstrap di mode card */
-        }
-
-        .user-table td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: right;
-            padding: 0.5rem 0.25rem;
-            border: none;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .user-table td:last-child {
-            border-bottom: none;
-        }
-
-        .user-table td::before {
-            content: attr(data-label);
-            font-weight: 600;
-            color: #6c757d;
-            text-align: left;
-            padding-right: 0.75rem;
-            white-space: nowrap;
-        }
-
-        /* Sel "no data" (colspan) tidak perlu jadi flex */
-        .user-table td[colspan] {
-            display: block;
-            text-align: center;
-        }
-
-        .user-table td[colspan]::before {
-            content: none;
-        }
-
-        /* Actions rapikan tombolnya biar sejajar di kanan */
-        .user-table td.text-center {
-            justify-content: flex-end;
-        }
-    }
+.user-table th,
+.user-table td {
+    vertical-align: middle;
+}
 </style>
