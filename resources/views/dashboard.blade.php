@@ -400,11 +400,11 @@ function setupEventListeners() {
             return;
         }
 
-        // ✅ FIX: Validasi maksimal 30 hari (hitung inklusif, sama seperti backend)
+        // ✅ FIX: Validasi maksimal 30 hari (hitung inklusif)
         const msPerDay = 24 * 60 * 60 * 1000;
-        const diffDays = Math.round((new Date(toDate) - new Date(fromDate)) / msPerDay) + 1;
+        const diffDaysCheck = Math.round((new Date(toDate) - new Date(fromDate)) / msPerDay) + 1;
 
-        if (diffDays > 30) {
+        if (diffDaysCheck > 30) {
             Swal.fire({
                 icon: 'error',
                 title: 'Rentang Terlalu Panjang!',
@@ -442,8 +442,7 @@ function applyFilters() {
     // ✅ FIX: Validasi rentang maksimal 30 hari (hitung inklusif)
     const start = new Date(currentFilters.from);
     const end   = new Date(currentFilters.to);
-    const msPerDay = 1000 * 60 * 60 * 24;
-    const diffDays = Math.round((end - start) / msPerDay) + 1;
+    const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
 
     if (diffDays > 30) {
         Swal.fire({

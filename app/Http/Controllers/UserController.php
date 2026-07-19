@@ -19,66 +19,66 @@ class UserController extends Controller
      * Dashboard utama
      */
     public function index(Request $request)
-    {
-        // Jika user adalah read_export, load sensor data
-        if (Auth::user()->role === 'read_export') {
-            $sensorUser = $this->getSensorUserFromAuth();
+{
+    // Jika user adalah read_export, load sensor data
+    if (Auth::user()->role === 'read_export') {
+        $sensorUser = $this->getSensorUserFromAuth();
+        
+        if ($sensorUser) {
+            $availableColumns = $this->getAvailableColumns($sensorUser->id);
             
-            if ($sensorUser) {
-                $availableColumns = $this->getAvailableColumns($sensorUser->id);
+            if (!empty($availableColumns)) {
+                // Get chart data
+                $from = $request->get('from');
+                $to = $request->get('to');
+                $parameter = $request->get('parameter', array_key_first($availableColumns));
                 
-                if (!empty($availableColumns)) {
-                    // Get chart data
-                    $from = $request->get('from');
-                    $to = $request->get('to');
-                    $parameter = $request->get('parameter', array_key_first($availableColumns));
-                    
-                    $sensorData = $this->getChartData($sensorUser->id, $from, $to, $availableColumns);
-                    
-                    // Get paginated table data
-                    $tableQuery = SensorData::where('user_id', $sensorUser->id);
-                    
-                    if ($from && $to) {
-                        $fromCarbon = Carbon::parse($from)->startOfDay();
-                        $toCarbon = Carbon::parse($to)->endOfDay();
-                        // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 30) {
-        return redirect()->back()->with('error', 'Rentang tanggal maksimal 30 hari!');
-    }
-    $toCarbon = $toCarbon->endOfDay();
-                        $tableQuery->whereBetween('datetime', [$fromCarbon, $toCarbon]);
-                    } else {
-                        // Default: 7 hari terakhir
-                        $tableQuery->whereBetween('datetime', [
-                            Carbon::now()->subDays(7)->startOfDay(),
-                            Carbon::now()->endOfDay()
-                        ]);
+                $sensorData = $this->getChartData($sensorUser->id, $from, $to, $availableColumns);
+                
+                // Get paginated table data
+                $tableQuery = SensorData::where('user_id', $sensorUser->id);
+                
+                if ($from && $to) {
+                    $fromCarbon = Carbon::parse($from)->startOfDay();
+                    $toCarbon = Carbon::parse($to)->startOfDay();
+                    // ✅ FIX: Batasi maksimal 30 hari (hitung inklusif +1)
+                    if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
+                        return redirect()->back()->with('error', 'Rentang tanggal maksimal 30 hari!');
                     }
-                    
-                    $paginatedSensorData = $tableQuery->orderBy('datetime', 'desc')->paginate(15);
-                    $paginatedSensorData->appends($request->query());
-                    
-                    return view('dashboard', compact('availableColumns', 'sensorData', 'paginatedSensorData'));
+                    $toCarbon = $toCarbon->endOfDay();
+                    $tableQuery->whereBetween('datetime', [$fromCarbon, $toCarbon]);
+                } else {
+                    // Default: 7 hari terakhir
+                    $tableQuery->whereBetween('datetime', [
+                        Carbon::now()->subDays(7)->startOfDay(),
+                        Carbon::now()->endOfDay()
+                    ]);
                 }
-            } 
-            
-            // Jika tidak ada data sensor
-            return view('dashboard', [
-                'availableColumns' => [],
-                'sensorData' => [],
-                'paginatedSensorData' => null
-            ]);
-        }
-
-        // Jika user adalah superadmin, tampilkan daftar semua user
-        if (Auth::user()->role === 'superadmin') {
-            $users = CustomUser::orderBy('id', 'desc')->get();
-            return view('dashboard', compact('users'));
-        }
-
-        // Default fallback
-        return view('dashboard');
+                
+                $paginatedSensorData = $tableQuery->orderBy('datetime', 'desc')->paginate(15);
+                $paginatedSensorData->appends($request->query());
+                
+                return view('dashboard', compact('availableColumns', 'sensorData', 'paginatedSensorData'));
+            }
+        } 
+        
+        // Jika tidak ada data sensor
+        return view('dashboard', [
+            'availableColumns' => [],
+            'sensorData' => [],
+            'paginatedSensorData' => null
+        ]);
     }
+
+    // Jika user adalah superadmin, tampilkan daftar semua user
+    if (Auth::user()->role === 'superadmin') {
+        $users = CustomUser::orderBy('id', 'desc')->get();
+        return view('dashboard', compact('users'));
+    }
+
+    // Default fallback
+    return view('dashboard');
+}
 
     public function export(Request $request)
 {
@@ -384,7 +384,7 @@ public function destroy(Request $request, $id)
     ]);
 }
 
-   /**
+    /**
  * API: Filtered sensor data untuk chart
  */
 public function getFilteredSensorData(Request $request)
@@ -402,7 +402,7 @@ public function getFilteredSensorData(Request $request)
     $to = $request->get('to');
     $parameter = $request->get('parameter');
 
-    // ✅ Validasi range tanggal max 30 hari
+    // ✅ FIX: Validasi range tanggal max 30 hari (hitung inklusif +1)
     if ($from && $to) {
         $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
         $toDate = \Carbon\Carbon::parse($to)->startOfDay();
@@ -433,67 +433,64 @@ public function getFilteredSensorData(Request $request)
     ]);
 }
 
-    /**
-     * API: Table data dengan pagination
-     */
-    public function getTableData(Request $request)
-    {
-        $sensorUser = $this->getSensorUserFromAuth();
-        
-        if (!$sensorUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
-
-        $from = $request->get('from');
-        $to = $request->get('to');
-        $page = $request->get('page', 1);
-
-        $availableColumns = $this->getAvailableColumns($sensorUser->id);
-        
-        if (empty($availableColumns)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada data sensor'
-            ]);
-        }
-
-        $query = SensorData::where('user_id', $sensorUser->id);
-
-        if ($from && $to) {
-            $fromCarbon = Carbon::parse($from)->startOfDay();
-            $toCarbon = Carbon::parse($to)->startOfDay();
-            
-            // ✅ Batasi maksimal 30 hari (hitung inklusif +1)
-            if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Rentang tanggal maksimal 30 hari!'
-                ]);
-            }
-            
-            $toCarbon = $toCarbon->endOfDay();
-            $query->whereBetween('datetime', [$fromCarbon, $toCarbon]);
-        } else {
-            $query->whereBetween('datetime', [
-                Carbon::now()->subDays(7)->startOfDay(),
-                Carbon::now()->endOfDay()
-            ]);
-        }
-
-        $sensorData = $query->orderBy('datetime', 'desc')->paginate(15);
-        $sensorData->appends($request->query());
-
-        $html = view('dashboard.partials.table-content', compact('sensorData', 'availableColumns'))->render();
-
+   /**
+ * API: Table data dengan pagination
+ */
+public function getTableData(Request $request)
+{
+    $sensorUser = $this->getSensorUserFromAuth();
+    
+    if (!$sensorUser) {
         return response()->json([
-            'success' => true,
-            'html' => $html
+            'success' => false,
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
+    $from = $request->get('from');
+    $to = $request->get('to');
+    $page = $request->get('page', 1);
+
+    $availableColumns = $this->getAvailableColumns($sensorUser->id);
+    
+    if (empty($availableColumns)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada data sensor'
         ]);
     }
 
+    $query = SensorData::where('user_id', $sensorUser->id);
+
+    if ($from && $to) {
+        $fromCarbon = Carbon::parse($from)->startOfDay();
+        $toCarbon = Carbon::parse($to)->startOfDay();
+        // ✅ FIX: Batasi maksimal 30 hari (hitung inklusif +1)
+        if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rentang tanggal maksimal 30 hari!'
+            ]);
+        }
+        $toCarbon = $toCarbon->endOfDay();
+        $query->whereBetween('datetime', [$fromCarbon, $toCarbon]);
+    } else {
+        $query->whereBetween('datetime', [
+            Carbon::now()->subDays(7)->startOfDay(),
+            Carbon::now()->endOfDay()
+        ]);
+    }
+
+    $sensorData = $query->orderBy('datetime', 'desc')->paginate(15);
+    $sensorData->appends($request->query());
+
+    $html = view('dashboard.partials.table-content', compact('sensorData', 'availableColumns'))->render();
+
+    return response()->json([
+        'success' => true,
+        'html' => $html
+    ]);
+}
 
     // Helper methods tetap sama...
     private function getChartData($userId, $from = null, $to = null, $availableColumns = [])
