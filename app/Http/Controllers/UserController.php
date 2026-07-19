@@ -433,6 +433,7 @@ public function destroy(Request $request, $id)
             'chartData' => $chartData
         ]);
     }
+}
 
     /**
      * API: Table data dengan pagination
@@ -492,6 +493,7 @@ public function destroy(Request $request, $id)
             'html' => $html
         ]);
     }
+
 
     // Helper methods tetap sama...
     private function getChartData($userId, $from = null, $to = null, $availableColumns = [])
