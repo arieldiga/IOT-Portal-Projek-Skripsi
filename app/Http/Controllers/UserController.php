@@ -541,19 +541,67 @@ public function getTableData(Request $request)
             'columns' => array_keys($availableColumns)
         ]);
     
-        $result = $query->selectRaw("
-                $groupBy as period_start,
-                MIN(datetime) as datetime,
-                $selectRaw
-            ")
-            ->groupBy('period_start')
-            ->orderBy('period_start', 'asc')
-            ->get()
-            ->map(function ($row) use ($format) {
-                $data = $row->toArray();
-                $data['formatted_time'] = Carbon::parse($row->datetime)->format($format);
-                return $data;
-            });
+        $rawResult = $query->selectRaw("
+        $groupBy as period_start,
+        MIN(datetime) as datetime,
+        $selectRaw
+    ")
+    ->groupBy('period_start')
+    ->orderBy('period_start', 'asc')
+    ->get()
+    ->keyBy(function ($row) use ($groupBy) {
+        return Carbon::parse($row->datetime)->format('Y-m-d H:i:s');
+    });
+
+// ✅ Generate semua slot waktu dalam rentang (termasuk yang kosong, diisi 0)
+$result = collect();
+$cursor = $fromCarbon->copy();
+
+// Tentukan interval berdasarkan $groupBy
+if (str_contains($groupBy, 'hour')) {
+    $interval = '1 hour';
+} elseif (str_contains($groupBy, 'week')) {
+    $interval = '1 week';
+} else {
+    $interval = '1 day';
+}
+
+while ($cursor->lessThanOrEqualTo($toCarbon)) {
+    $key = $cursor->copy()->startOfDay()->format('Y-m-d H:i:s');
+    
+    // Cari data yang cocok di rentang waktu ini (toleransi pencarian per hari/jam)
+    $matched = $rawResult->first(function ($row, $rowKey) use ($cursor, $interval) {
+        $rowDate = Carbon::parse($rowKey);
+        if ($interval === '1 hour') {
+            return $rowDate->format('Y-m-d H') === $cursor->format('Y-m-d H');
+        } elseif ($interval === '1 week') {
+            return $rowDate->isSameWeek($cursor);
+        }
+        return $rowDate->isSameDay($cursor);
+    });
+
+    if ($matched) {
+        $data = $matched->toArray();
+        $data['formatted_time'] = Carbon::parse($matched->datetime)->format($format);
+    } else {
+        // Slot kosong -> isi 0 untuk semua kolom
+        $data = ['period_start' => $cursor->toDateTimeString(), 'datetime' => $cursor->toDateTimeString()];
+        foreach (array_keys($availableColumns) as $column) {
+            $data[$column] = 0;
+        }
+        $data['formatted_time'] = $cursor->format($format);
+    }
+
+    $result->push($data);
+
+    if ($interval === '1 hour') {
+        $cursor->addHour();
+    } elseif ($interval === '1 week') {
+        $cursor->addWeek();
+    } else {
+        $cursor->addDay();
+    }
+}
     
         // Log hasil
         \Log::info("Chart Data Result", [
