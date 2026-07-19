@@ -384,55 +384,53 @@ public function destroy(Request $request, $id)
     ]);
 }
 
-    /**
-     * API: Filtered sensor data untuk chart
-     */
-    public function getFilteredSensorData(Request $request)
-    {
-        $sensorUser = $this->getSensorUserFromAuth();
-        
-        if (!$sensorUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
-
-        $from = $request->get('from');
-        $to = $request->get('to');
-        $parameter = $request->get('parameter');
-
-        // ✅ Validasi range tanggal max 30 hari
-    if ($from && $to) {
-        if ($from && $to) {
-            $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
-            $toDate = \Carbon\Carbon::parse($to)->startOfDay();
-        
-            if ($fromDate->diffInDays($toDate) + 1 > 30) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Rentang tanggal maksimal 30 hari.'
-                ], 422);
-            }
-        }
-
-        $availableColumns = $this->getAvailableColumns($sensorUser->id);
-        
-        if (empty($availableColumns)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada data sensor'
-            ]);
-        }
-
-        $chartData = $this->getChartData($sensorUser->id, $from, $to, $availableColumns);
-
+   /**
+ * API: Filtered sensor data untuk chart
+ */
+public function getFilteredSensorData(Request $request)
+{
+    $sensorUser = $this->getSensorUserFromAuth();
+    
+    if (!$sensorUser) {
         return response()->json([
-            'success' => true,
-            'availableColumns' => $availableColumns,
-            'chartData' => $chartData
+            'success' => false,
+            'message' => 'Unauthorized'
+        ], 403);
+    }
+
+    $from = $request->get('from');
+    $to = $request->get('to');
+    $parameter = $request->get('parameter');
+
+    // ✅ Validasi range tanggal max 30 hari
+    if ($from && $to) {
+        $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
+        $toDate = \Carbon\Carbon::parse($to)->startOfDay();
+
+        if ($fromDate->diffInDays($toDate) + 1 > 30) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rentang tanggal maksimal 30 hari.'
+            ], 422);
+        }
+    }
+
+    $availableColumns = $this->getAvailableColumns($sensorUser->id);
+    
+    if (empty($availableColumns)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Tidak ada data sensor'
         ]);
     }
+
+    $chartData = $this->getChartData($sensorUser->id, $from, $to, $availableColumns);
+
+    return response()->json([
+        'success' => true,
+        'availableColumns' => $availableColumns,
+        'chartData' => $chartData
+    ]);
 }
 
     /**
@@ -466,15 +464,17 @@ public function destroy(Request $request, $id)
 
         if ($from && $to) {
             $fromCarbon = Carbon::parse($from)->startOfDay();
-            $toCarbon = Carbon::parse($to)->endOfDay();
-            // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 30) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Rentang tanggal maksimal 30 hari!'
-        ]);
-    }
-    $toCarbon = $toCarbon->endOfDay();
+            $toCarbon = Carbon::parse($to)->startOfDay();
+            
+            // ✅ Batasi maksimal 30 hari (hitung inklusif +1)
+            if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rentang tanggal maksimal 30 hari!'
+                ]);
+            }
+            
+            $toCarbon = $toCarbon->endOfDay();
             $query->whereBetween('datetime', [$fromCarbon, $toCarbon]);
         } else {
             $query->whereBetween('datetime', [
