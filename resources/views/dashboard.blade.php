@@ -401,7 +401,7 @@ function setupEventListeners() {
         }
 
         // ✅ Validasi maksimal 30 hari
-        const maxRange = 30 * 24 * 60 * 60 * 1000; // 30 hari (ms)
+        const maxRange = 31 * 24 * 60 * 60 * 1000; // 30 hari (ms)
         const range = new Date(toDate) - new Date(fromDate);
 
         if (range > maxRange) {
@@ -444,7 +444,7 @@ function applyFilters() {
     const end   = new Date(currentFilters.to);
     const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
-    if (diffDays > 30) {
+    if (diffDays > 31) {
         Swal.fire({
             icon: 'warning',
             title: 'Rentang Terlalu Panjang!',

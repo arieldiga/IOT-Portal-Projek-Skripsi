@@ -42,7 +42,7 @@ class UserController extends Controller
                         $fromCarbon = Carbon::parse($from)->startOfDay();
                         $toCarbon = Carbon::parse($to)->endOfDay();
                         // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 30) {
+    if ($fromCarbon->diffInDays($toCarbon) > 31) {
         return redirect()->back()->with('error', 'Rentang tanggal maksimal 30 hari!');
     }
                         $tableQuery->whereBetween('datetime', [$fromCarbon, $toCarbon]);
@@ -406,7 +406,7 @@ public function destroy(Request $request, $id)
         $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
         $toDate = \Carbon\Carbon::parse($to)->endOfDay();
 
-        if ($fromDate->diffInDays($toDate) > 30) {
+        if ($fromDate->diffInDays($toDate) > 31) {
             return response()->json([
                 'success' => false,
                 'message' => 'Rentang tanggal maksimal 30 hari.'
@@ -465,7 +465,7 @@ public function destroy(Request $request, $id)
             $fromCarbon = Carbon::parse($from)->startOfDay();
             $toCarbon = Carbon::parse($to)->endOfDay();
             // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 30) {
+    if ($fromCarbon->diffInDays($toCarbon) > 31) {
         return response()->json([
             'success' => false,
             'message' => 'Rentang tanggal maksimal 30 hari!'
