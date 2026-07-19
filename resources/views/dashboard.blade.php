@@ -402,7 +402,7 @@ function setupEventListeners() {
 
         // ✅ FIX: Validasi maksimal 30 hari (hitung inklusif)
         const msPerDay = 24 * 60 * 60 * 1000;
-        const diffDaysCheck = Math.round((new Date(toDate) - new Date(fromDate)) / msPerDay) + 1;
+        const diffDaysCheck = Math.round((new Date(toDate) - new Date(fromDate)) / msPerDay);
 
         if (diffDaysCheck > 30) {
             Swal.fire({
@@ -442,7 +442,7 @@ function applyFilters() {
     // ✅ FIX: Validasi rentang maksimal 30 hari (hitung inklusif)
     const start = new Date(currentFilters.from);
     const end   = new Date(currentFilters.to);
-    const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const diffDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
 
     if (diffDays > 30) {
         Swal.fire({

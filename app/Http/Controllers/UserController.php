@@ -42,7 +42,7 @@ class UserController extends Controller
                     $fromCarbon = Carbon::parse($from)->startOfDay();
                     $toCarbon = Carbon::parse($to)->startOfDay();
                     // ✅ FIX: Batasi maksimal 30 hari (hitung inklusif +1)
-                    if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
+                    if ($fromCarbon->diffInDays($toCarbon) > 30) {
                         return redirect()->back()->with('error', 'Rentang tanggal maksimal 30 hari!');
                     }
                     $toCarbon = $toCarbon->endOfDay();
@@ -407,7 +407,7 @@ public function getFilteredSensorData(Request $request)
         $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
         $toDate = \Carbon\Carbon::parse($to)->startOfDay();
 
-        if ($fromDate->diffInDays($toDate) + 1 > 30) {
+        if ($fromDate->diffInDays($toDate) > 30) {
             return response()->json([
                 'success' => false,
                 'message' => 'Rentang tanggal maksimal 30 hari.'
@@ -466,7 +466,7 @@ public function getTableData(Request $request)
         $fromCarbon = Carbon::parse($from)->startOfDay();
         $toCarbon = Carbon::parse($to)->startOfDay();
         // ✅ FIX: Batasi maksimal 30 hari (hitung inklusif +1)
-        if ($fromCarbon->diffInDays($toCarbon) + 1 > 30) {
+        if ($fromCarbon->diffInDays($toCarbon) > 30) {
             return response()->json([
                 'success' => false,
                 'message' => 'Rentang tanggal maksimal 30 hari!'
