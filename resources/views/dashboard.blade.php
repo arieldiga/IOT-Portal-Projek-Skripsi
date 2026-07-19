@@ -400,11 +400,11 @@ function setupEventListeners() {
             return;
         }
 
-        // ✅ Validasi maksimal 30 hari
-        const maxRange = 31 * 24 * 60 * 60 * 1000; // 30 hari (ms)
-        const range = new Date(toDate) - new Date(fromDate);
+        // ✅ FIX: Validasi maksimal 30 hari (hitung inklusif, sama seperti backend)
+        const msPerDay = 24 * 60 * 60 * 1000;
+        const diffDays = Math.round((new Date(toDate) - new Date(fromDate)) / msPerDay) + 1;
 
-        if (range > maxRange) {
+        if (diffDays > 30) {
             Swal.fire({
                 icon: 'error',
                 title: 'Rentang Terlalu Panjang!',
@@ -439,12 +439,13 @@ function applyFilters() {
         to: formData.get('to')
     };
 
-    // ✅ Validasi rentang maksimal 30 hari
+    // ✅ FIX: Validasi rentang maksimal 30 hari (hitung inklusif)
     const start = new Date(currentFilters.from);
     const end   = new Date(currentFilters.to);
-    const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.round((end - start) / msPerDay) + 1;
 
-    if (diffDays > 31) {
+    if (diffDays > 30) {
         Swal.fire({
             icon: 'warning',
             title: 'Rentang Terlalu Panjang!',

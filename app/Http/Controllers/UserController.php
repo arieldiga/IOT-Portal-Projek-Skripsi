@@ -42,9 +42,10 @@ class UserController extends Controller
                         $fromCarbon = Carbon::parse($from)->startOfDay();
                         $toCarbon = Carbon::parse($to)->endOfDay();
                         // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 31) {
+    if ($fromCarbon->diffInDays($toCarbon) > 30) {
         return redirect()->back()->with('error', 'Rentang tanggal maksimal 30 hari!');
     }
+    $toCarbon = $toCarbon->endOfDay();
                         $tableQuery->whereBetween('datetime', [$fromCarbon, $toCarbon]);
                     } else {
                         // Default: 7 hari terakhir
@@ -403,16 +404,17 @@ public function destroy(Request $request, $id)
 
         // ✅ Validasi range tanggal max 30 hari
     if ($from && $to) {
-        $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
-        $toDate = \Carbon\Carbon::parse($to)->endOfDay();
-
-        if ($fromDate->diffInDays($toDate) > 31) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Rentang tanggal maksimal 30 hari.'
-            ], 422);
+        if ($from && $to) {
+            $fromDate = \Carbon\Carbon::parse($from)->startOfDay();
+            $toDate = \Carbon\Carbon::parse($to)->startOfDay();
+        
+            if ($fromDate->diffInDays($toDate) + 1 > 30) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Rentang tanggal maksimal 30 hari.'
+                ], 422);
+            }
         }
-    }
 
         $availableColumns = $this->getAvailableColumns($sensorUser->id);
         
@@ -465,12 +467,13 @@ public function destroy(Request $request, $id)
             $fromCarbon = Carbon::parse($from)->startOfDay();
             $toCarbon = Carbon::parse($to)->endOfDay();
             // ✅ Batasi maksimal 30 hari
-    if ($fromCarbon->diffInDays($toCarbon) > 31) {
+    if ($fromCarbon->diffInDays($toCarbon) > 30) {
         return response()->json([
             'success' => false,
             'message' => 'Rentang tanggal maksimal 30 hari!'
         ]);
     }
+    $toCarbon = $toCarbon->endOfDay();
             $query->whereBetween('datetime', [$fromCarbon, $toCarbon]);
         } else {
             $query->whereBetween('datetime', [
